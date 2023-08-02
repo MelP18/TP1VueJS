@@ -4,32 +4,25 @@
             <div class="form__head">
                 <h2>TO-DO-LIST</h2>
             </div>
-            <div class="form__middle" v-for="element in TaskList" :class="element.is_finished ? 'active' : ''">
-                <!-- <div :class="element.is_finished ? 'active' : ''"> -->
-                    <div v-if='element.is_finished' class="task">
-                        <h4 class="bar">{{ element.name }}</h4>
-                        <input v-bind:checked='element.is_finished' type="checkbox">
-                    </div>
-                    <div v-else class="task">
-                        <h4>{{ element.name }}</h4>
-                        <input v-bind:checked='element.is_finished' type="checkbox">
-                    </div>
-
-               <!--  </div> -->
-                
-
+            <task @delete="deleteTask" v-for=" element in TaskList" :element="element" />
+            <div>
+                <label>Nom de la tâche</label>
+                <input type="text" v-model="task">
+                <Btn @click="addTask" />
             </div>
-            <div class="taskModal">
-                <span @click="closeTaskModal"></span>
-                <label for="" class="name__of__task">Nom de la tâche</label>
-                <input type="text">
-                <button @click="addTask">Ajouter</button>
-            </div>
-            <div class="form__bottom">
-                <button @click="openTaskModal">
+            <!-- <div class="taskModal">
+                <span></span> 
+                <label>Nom de la tâche</label>
+                <input type="text" v-model="task">
+               <button @click="addTask">Ajouter</button> 
+            </div> -->
+
+            <!-- <div>{{ line }}</div>  -->
+             <div class="form__bottom">
+                <button @click="">
                     {{ add }}
                 </button>
-            </div>
+            </div> 
 
         </div>
     </div>
@@ -38,62 +31,48 @@
 
 /*===========================================+++ SCRIPT JS ++=============================================*/
 <script lang="ts" setup>
+
+import Task from "@/components/Task.vue"
+import Btn from "@/components/Btn.vue"
 import { ref } from 'vue'
 //const count = ref(0)
-
+const task = ref('')
 const add = ref('Ajouter une tache')
 
-function openTaskModal(){
-let  task = document.querySelector('.taskModal')
- if(task){
-    task.classList.add('active')
- }
-}
-function closeTaskModal(){
-    let  task = document.querySelector('.taskModal')
-    let  close = document.querySelector('.taskModal span')
-    if(close){
-        if(task){
-            task.classList.remove('active')
-        }
+function deleteTask(element) {
+    console.log(element);
+    const index = TaskList.value.findIndex((item) => item.name == element.name)
+    if (index >= 0) {
+        TaskList.value.splice(index, 1)
     }
+    console.log(index);
+
+
 }
 
-function addTask (){
-    let formMiddle = document.querySelector('.form__middle')
-    if(formMiddle){
-        let input = document.querySelector('.taskModal input')
-        if(input){
-            const inputValue = input.value
-            const  lineTask = 
-                `
-                    <div class="task">
-                        <h4>${inputValue}</h4>
-                        <input v-bind:checked='element.is_finished' type="checkbox">
-                    </div>
-                `
-            formMiddle.innerHTML += lineTask
-
-            const  lineTaskList = 
-                {
-                name: inputValue,
-                is_finished: false
-            }
-            TaskList.push(lineTaskList)
-            console.log(lineTaskList);
-        }
-    }
-   
-   
+const addTask = () => {
+    TaskList.value.push({
+        name: task.value,
+        is_finished: false
+    }),
+        task.value = ''
 }
-const TaskList = [
+/* function markAsImportant(element) {
+    element.is_important = !element.is_important
+} */
+console.log(addTask);
+
+const TaskList = ref([
     {
         name: 'Lessive',
-        is_finished: false
+        is_finished: false,
+        is_important: false
+
     },
     {
         name: 'Achat',
-        is_finished: true
+        is_finished: false,
+        is_important: true
     },
     {
         name: 'Vente',
@@ -105,9 +84,9 @@ const TaskList = [
     },
     {
         name: 'Exercice',
-        is_finished: true
+        is_finished: false
     },
-]
+])
 console.log(TaskList);
 
 
@@ -136,14 +115,25 @@ console.log(TaskList);
 }
 
 .block .register {
-    width: 40%;
+    width: 35%;
+    height: 460px;
     border: 1px solid white;
-    background-color: rgb(72, 71, 71);
+    background-color: rgb(15, 15, 15);
     padding: 15px;
     display: flex;
     flex-direction: column;
     gap: 25px;
     box-shadow: 0px 0px 5px;
+    overflow-y: scroll;
+}
+
+.block .register::-webkit-scrollbar {
+    width: 5px;
+}
+
+.block .register::-webkit-scrollbar-thumb {
+    background-color: rgb(142, 20, 20);
+    border-radius: 20px;
 }
 
 .form__middle {
@@ -175,12 +165,18 @@ console.log(TaskList);
 }
 
 .task input {
-    width: 20px;
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+
 }
+
 .active {
-   background-color: white;
-   .task h4 {
-    color: black
+    /*  border: 1px solid rgb(88, 221, 31); */
+    background-color: rgb(120, 3, 3);
+
+    .task h4 {
+        color: black
     }
 }
 
@@ -199,31 +195,33 @@ console.log(TaskList);
     border-radius: 9px;
     border: none;
 }
-.taskModal{
+
+/* .taskModal {
     width: 100%;
-    height:100%;
+    height: 100%;
     position: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #550101b5;
-    z-index:6;
+    z-index: 6;
     border: 2px solid black;
-    top:50%;
+    top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%) scale(0) ;
+    transform: translate(-50%, -50%) scale(0) ;
     opacity: 0;
     visibility: hidden;
     transition: 1s;
 }
-.taskModal.active{
+
+.taskModal.active {
     visibility: visible;
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
 }
 
-.taskModal span{
-    position: absolute; 
+.taskModal span {
+    position: absolute;
     display: block;
     width: 35px;
     height: 35px;
@@ -232,21 +230,31 @@ console.log(TaskList);
     right: 30px;
 }
 
-.taskModal span::after, .taskModal span::before{
+.taskModal span::after,
+.taskModal span::before {
     content: '';
     width: 30px;
     height: 4px;
     background-color: #fff;
     position: absolute;
     top: 50%;
-    left: 50%; 
+    left: 50%;
 
 }
-.taskModal span::after{
+
+.taskModal span::after {
     transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.taskModal span::before{
+.taskModal span::before { 
     transform: translate(-50%, -50%) rotate(45deg);
-} 
+}*/
+.star {
+    width: 15px;
+    cursor: pointer;
+}
+
+.task p {
+    cursor: pointer;
+}
 </style>
